@@ -16,10 +16,13 @@ namespace Crud.Controllers
     {
         private readonly CourseContext _db;
         private readonly IConfiguration _configuration;
-        public CourseController(CourseContext db, IConfiguration configuration)
+        private readonly ILogger<CourseController> _logger;
+
+        public CourseController(CourseContext db, IConfiguration configuration,ILogger<CourseController> logger)
         {
             _db = db;
             _configuration = configuration;
+            _logger=logger;
         }
 
         [HttpPost]
@@ -78,6 +81,7 @@ namespace Crud.Controllers
         [Route("api/Read/all")]
         public ActionResult<IEnumerable<Course>> Reading()
         {
+            _logger.LogInformation("Logging Executing...");
             var data = _db.courseset.ToList();
             var config = new MapperConfiguration(cfg => {
                 cfg.CreateMap<Course, CourseDTO>();

@@ -1,7 +1,16 @@
 using Crud.EF;
 using Microsoft.EntityFrameworkCore;
+using Prometheus;
+using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
+var logger=new LoggerConfiguration()
+    .ReadFrom.Configuration(builder.Configuration)
+    .Enrich.FromLogContext().CreateLogger();
+
+builder.Logging.ClearProviders();
+builder.Logging.AddSerilog(logger);
+
 
 // Add services to the container.
 builder.Services.AddDbContext<CourseContext>(options =>
@@ -21,9 +30,18 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+app.UseRouting();
+app.UseHttpMetrics(options =>
+{
+    options.AddCustomLabel("host", context => context.Request.Host.Host);
+});
 
 app.UseAuthorization();
 
-app.MapControllers();
+app.UseEndpoints(endpoints =>
+{
+    endpoints.MapControllers();
+});
+
 
 app.Run();
